@@ -1,4 +1,4 @@
-import { useStreakStore, usePrepStore } from "@/stores/leStore";
+import { useStreakStore, usePrepStore, useCoinInventoryStore } from "@/stores/leStore";
 import { usePinia } from "../plugins/pinia";
 
 export default defineEventHandler(async (event) => {
@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
   const pinia = usePinia();
   const streakStore = useStreakStore(pinia);
   const prepStore = usePrepStore(pinia);
+  const inventoryStore = useCoinInventoryStore(pinia);
   
   prepStore.setRecapMsg("Initialisation");
 
@@ -24,5 +25,6 @@ export default defineEventHandler(async (event) => {
   return {
     datastate: streakStore.$state,
     prepstate: prepStore.$state,
+    inventoryState: inventoryStore.$state,
   };
 });

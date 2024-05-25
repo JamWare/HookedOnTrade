@@ -132,3 +132,48 @@ export const usePrepStore = defineStore({
         },
     }
 });
+
+export const useCoinInventoryStore = defineStore({
+    id: "coinInventoryStore", // unique id of the store
+    state: () => {
+        return {
+            inventory: {},
+        }
+    },
+    actions: {
+        longCoin(coin, quantity = 1) {
+            this.inventory[coin] = quantity;
+        },
+        shortCoin(coin, quantity = 1) {
+            this.inventory[coin] = -quantity;
+        },
+        removeCoin(coin) {
+            if (this.inventory[coin]) {
+                delete this.inventory[coin];
+            }
+        },
+        addQuantity(coin, quantity) {
+            if (this.inventory[coin]) {
+                this.inventory[coin] += quantity;
+            }
+            else {
+                console.error(`Coin ${coin} not found in inventory`);
+            }
+        },
+        setQuantity(coin, quantity) {
+            if (this.inventory[coin]) {
+                this.inventory[coin] = quantity;
+            } else {
+                console.error(`Coin ${coin} not found in inventory.`);
+            }
+        },
+    },
+    getters: {
+        getInventory: (state) => {
+            return state.inventory
+        },
+        getCoin: (state) => (coin) => {
+            return state.inventory[coin]
+        },
+    }
+});

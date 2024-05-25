@@ -80,7 +80,7 @@
 </template>
 <script setup>
 const inputs = ref({
-  USDT: 0,
+  USDT: 156,
   maxDrawdown: 5,
   status: "neutral",
   size: 1,

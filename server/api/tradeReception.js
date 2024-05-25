@@ -1,23 +1,21 @@
 import { accountUSDT } from "./accInfo";
-import { useStreakStore, usePrepStore } from "@/stores/leStore";
+import { useStreakStore, usePrepStore, useCoinInventoryStore } from "@/stores/leStore";
 import { usePinia } from "../plugins/pinia";
 import { long } from "./aBuy";
-import { sell } from "./aSell";
+import { short } from "./aShort";
 
 export default defineEventHandler(async (event) => {
-  let dataState = {};
-  let prepState = {};
   const pinia = usePinia();
 
   const streakStore = useStreakStore(pinia);
   const prepStore = usePrepStore(pinia);
+  const coinInventoryStore = useCoinInventoryStore(pinia);
 
   const body = await readBody(event);
 
   const USDT = await accountUSDT();
 
-  dataState = streakStore.$state;
-  prepState = prepStore.$state;
+  const currency = body.currency;
 
   const baseAmount = prepStore.getUSDT;
   const currencyGap = USDT - baseAmount;
@@ -33,6 +31,14 @@ export default defineEventHandler(async (event) => {
   let won = streakStore.getWin;
   let loss = streakStore.getLoss;
 
+  if (body && body.tradeType !== "long" && body.tradeType !== "short" && body.tradeType !== "sell") {
+    streakStore.setStop(true);
+    prepStore.setRecapMsg("Body content not recognized");
+    return {
+      response: "Body content not recognized",
+    };
+  }
+
   if (size < 1 || stop) {
     prepStore.setRecapMsg("Stopped with : setSize = " + size + " and stop = " + stop);
     streakStore.stop = true;
@@ -45,16 +51,54 @@ export default defineEventHandler(async (event) => {
 
   if (!preventFirstTrade) {
     if (body.tradeType === "long") {
-      const sellResp = await long("SHIBUSDTM", size, leverage);
-      if (sellResp.code !== "200000") {
-        streakStore.stop = true;
-        prepStore.setRecapMsg("failed to call sell API & close trade");
+      if (coinInventoryStore.getCoin(currency) < 0) {
+        //const buyResp = await long(currency, coinInventoryStore.getCoin(currency) + size, leverage);
+        coinInventoryStore.longCoin(currency, - coinInventoryStore.getCoin(currency) + size);
       }
-    } else if (body.tradeType === "sell") {
-      const buyResp = await sell("SHIBUSDTM", size, leverage);
-      if (buyResp.code !== "200000") {
-        streakStore.stop = true;
-        prepStore.setRecapMsg("failed to call buy API & close trade");
+      else {
+        //console.log("Buy Pass");
+        //const buyResp = await long(currency, size, leverage);
+        coinInventoryStore.longCoin(currency, size);
+      }
+      //const shortResp = await long(currency, size, leverage);
+      // if (shortResp.code !== "200000") {
+      //   streakStore.stop = true;
+      //   prepStore.setRecapMsg("failed to call sell API & close trade");
+      // }
+    } else if (body.tradeType === "short") { // DONT FORGET TO CHANGE THE API CALLS AFTER TESTING
+      coinInventoryStore.shortCoin(currency, size);
+      //const buyResp = await short(currency, size, leverage);
+      // if (buyResp.code !== "200000") {
+      //   streakStore.stop = true;
+      //   prepStore.setRecapMsg("failed to call buy API & close trade");
+      // }
+      if (coinInventoryStore.getCoin(currency) > 0) {
+        //const buyResp = await short(currency, coinInventoryStore.getCoin(currency) + size, leverage);
+        coinInventoryStore.shortCoin(currency, coinInventoryStore.getCoin(currency) + size);
+      }
+      else {
+        //const buyResp = await short(currency, size, leverage);
+        coinInventoryStore.shortCoin(currency, size);
+      }
+    }
+    else if (body.tradeType === "sell") {
+      console.log(coinInventoryStore.getCoin(currency));
+      if(coinInventoryStore.getCoin(currency) >= 1){
+        //const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
+        coinInventoryStore.setQuantity(currency, 0);
+        // if (sellResp.code !== "200000") {
+        //   coinInventoryStore.setQuantity(coinInventoryStore.getCoin(currency) + 1);
+        //   streakStore.stop = true;
+        //   prepStore.setRecapMsg("failed to call sell API & close trade");
+        // }
+      }
+      else if (coinInventoryStore.getCoin(currency) < 0){
+        //const shortResp = await long(currency, coinInventoryStore.getCoin(currency), leverage);
+        coinInventoryStore.setQuantity(0);
+      }
+      else {
+        streakStore.setStop(true);
+        prepStore.setRecapMsg("No coins to sell");
       }
     }
   } else {
@@ -138,27 +182,6 @@ export default defineEventHandler(async (event) => {
   // size = dataFile.size;
   // leverage = dataFile.leverage;
   // await fileWrite("prepnRecap.json", prepFile);
-
-  if (body.tradeType === "long") {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const buyResp = await long("SHIBUSDTM", size, leverage);
-
-    if (buyResp.code !== "200000") {
-      streakStore.stop = true;
-      prepStore.setRecapMsg("failed to call buy API");
-    }
-  } else if (body.tradeType === "sell") {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const sellResp = await sell("SHIBUSDTM", size, leverage);
-
-    if (sellResp.code !== "200000") {
-      streakStore.stop = true;
-      prepStore.setRecapMsg( "failed to call sell API");
-    }
-  } else {
-    streakStore.setStop(true);
-    prepStore.setRecapMsg("Body content not recognized");
-  }
 
   return {
     response: "Going good",
