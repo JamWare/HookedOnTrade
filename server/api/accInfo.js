@@ -9,12 +9,15 @@ export const accountUSDT = async () => {
 
 export default defineEventHandler(async (event) => {
 
+    let infoResp = {}
     const body = await readBody(event);
     const FSDK = futuresSDK();
     if (body) {
-        const infoResp = await FSDK.futuresAccount(body.currency);
+        infoResp = await FSDK.futuresAccount(body.currency);
     }
-    const infoResp = await FSDK.futuresAccount('USDT');
+    else {
+        infoResp = await FSDK.futuresAccount('USDT');
+    }
     const accountUSDT = infoResp.data.accountEquity; 
 
     //Helpers

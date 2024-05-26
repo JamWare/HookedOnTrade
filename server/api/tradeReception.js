@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
 
-  const USDT = await accountUSDT();
+  const USDT = 156//await accountUSDT();
 
   const currency = body.currency;
 
@@ -43,67 +43,93 @@ export default defineEventHandler(async (event) => {
     prepStore.setRecapMsg("Stopped with : setSize = " + size + " and stop = " + stop);
     streakStore.stop = true;
     streakStore.size = 0;
+    // Selling all coins
+    if(coinInventoryStore.getCoin(currency) >= 1){
+      //const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
+      coinInventoryStore.setQuantity(currency, 0);
+      // if (sellResp.code !== "200000") {
+      //   coinInventoryStore.setQuantity(coinInventoryStore.getCoin(currency) + 1);
+      //   streakStore.stop = true;
+      //   prepStore.setRecapMsg("failed to call sell API & close trade");
+      // }
+    }
+    else if (coinInventoryStore.getCoin(currency) < 0){
+      //const shortResp = await long(currency, coinInventoryStore.getCoin(currency), leverage);
+      coinInventoryStore.setQuantity(0);
+    }
+    else {
+      streakStore.setStop(true);
+      prepStore.setRecapMsg("No coins to sell");
+    }
+
     return {
       response: "stopped with : setSize = " + size + " and stop = " + stop,
       size: 0,
     };
   }
 
-  if (!preventFirstTrade) {
-    if (body.tradeType === "long") {
-      if (coinInventoryStore.getCoin(currency) < 0) {
-        //const buyResp = await long(currency, coinInventoryStore.getCoin(currency) + size, leverage);
-        coinInventoryStore.longCoin(currency, - coinInventoryStore.getCoin(currency) + size);
-      }
-      else {
-        //console.log("Buy Pass");
-        //const buyResp = await long(currency, size, leverage);
-        coinInventoryStore.longCoin(currency, size);
-      }
-      //const shortResp = await long(currency, size, leverage);
-      // if (shortResp.code !== "200000") {
+  if (body.tradeType === "long") {
+    if (coinInventoryStore.getCoin(currency) < 0) {
+      //const buyResp = await long(currency, coinInventoryStore.getCoin(currency) + size, leverage);
+      coinInventoryStore.longCoin(currency, - coinInventoryStore.getCoin(currency));
+    }
+    else {
+      //console.log("Buy Pass");
+      //const buyResp = await long(currency, size, leverage);
+      coinInventoryStore.longCoin(currency, size);
+    }
+    return {
+      currency: currency,
+      inventory: coinInventoryStore.getCoin(currency),
+    }
+    //const shortResp = await long(currency, size, leverage);
+    // if (shortResp.code !== "200000") {
+    //   streakStore.stop = true;
+    //   prepStore.setRecapMsg("failed to call sell API & close trade");
+    // }
+  } else if (body.tradeType === "short") { // DONT FORGET TO CHANGE THE API CALLS AFTER TESTING
+    //coinInventoryStore.shortCoin(currency, size);
+    //const buyResp = await short(currency, size, leverage);
+    // if (buyResp.code !== "200000") {
+    //   streakStore.stop = true;
+    //   prepStore.setRecapMsg("failed to call buy API & close trade");
+    // }
+    if (coinInventoryStore.getCoin(currency) > 0) {
+      //const buyResp = await short(currency, coinInventoryStore.getCoin(currency) + size, leverage);
+      coinInventoryStore.shortCoin(currency, coinInventoryStore.getCoin(currency));
+    }
+    else {
+      //const buyResp = await short(currency, size, leverage);
+      coinInventoryStore.shortCoin(currency, size);
+    }
+    return {
+      currency: currency,
+      inventory: coinInventoryStore.getCoin(currency),
+    }
+  }
+  else if (body.tradeType === "sell") {
+    //console.log(coinInventoryStore.getCoin(currency));
+    if(coinInventoryStore.getCoin(currency) >= 1){
+      //const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
+      coinInventoryStore.setQuantity(currency, 0);
+      // if (sellResp.code !== "200000") {
+      //   coinInventoryStore.setQuantity(coinInventoryStore.getCoin(currency) + 1);
       //   streakStore.stop = true;
       //   prepStore.setRecapMsg("failed to call sell API & close trade");
       // }
-    } else if (body.tradeType === "short") { // DONT FORGET TO CHANGE THE API CALLS AFTER TESTING
-      coinInventoryStore.shortCoin(currency, size);
-      //const buyResp = await short(currency, size, leverage);
-      // if (buyResp.code !== "200000") {
-      //   streakStore.stop = true;
-      //   prepStore.setRecapMsg("failed to call buy API & close trade");
-      // }
-      if (coinInventoryStore.getCoin(currency) > 0) {
-        //const buyResp = await short(currency, coinInventoryStore.getCoin(currency) + size, leverage);
-        coinInventoryStore.shortCoin(currency, coinInventoryStore.getCoin(currency) + size);
-      }
-      else {
-        //const buyResp = await short(currency, size, leverage);
-        coinInventoryStore.shortCoin(currency, size);
-      }
     }
-    else if (body.tradeType === "sell") {
-      console.log(coinInventoryStore.getCoin(currency));
-      if(coinInventoryStore.getCoin(currency) >= 1){
-        //const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
-        coinInventoryStore.setQuantity(currency, 0);
-        // if (sellResp.code !== "200000") {
-        //   coinInventoryStore.setQuantity(coinInventoryStore.getCoin(currency) + 1);
-        //   streakStore.stop = true;
-        //   prepStore.setRecapMsg("failed to call sell API & close trade");
-        // }
-      }
-      else if (coinInventoryStore.getCoin(currency) < 0){
-        //const shortResp = await long(currency, coinInventoryStore.getCoin(currency), leverage);
-        coinInventoryStore.setQuantity(0);
-      }
-      else {
-        streakStore.setStop(true);
-        prepStore.setRecapMsg("No coins to sell");
-      }
+    else if (coinInventoryStore.getCoin(currency) < 0){
+      //const shortResp = await long(currency, coinInventoryStore.getCoin(currency), leverage);
+      coinInventoryStore.setQuantity(currency, 0);
     }
-  } else {
-    preventFirstTrade = false;
-    streakStore.setPreventFirstTrade(preventFirstTrade);
+    else {
+      streakStore.setStop(true);
+      prepStore.setRecapMsg("No coins to sell");
+    }
+    return {
+      currency: currency,
+      inventory: coinInventoryStore.getCoin(currency),
+    }
   }
 
   if (lossCheck > maxDrawdown) {

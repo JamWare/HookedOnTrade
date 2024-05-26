@@ -142,10 +142,20 @@ export const useCoinInventoryStore = defineStore({
     },
     actions: {
         longCoin(coin, quantity = 1) {
-            this.inventory[coin] = quantity;
+            if (this.inventory[coin] && this.inventory[coin] > 0) {
+                this.inventory[coin] += quantity;
+            }
+            else {
+                this.inventory[coin] = quantity;
+            }
         },
         shortCoin(coin, quantity = 1) {
-            this.inventory[coin] = -quantity;
+            if (this.inventory[coin] && this.inventory[coin] < 0) {
+                this.inventory[coin] -= quantity;
+            }
+            else {
+                this.inventory[coin] = -quantity;
+            }
         },
         removeCoin(coin) {
             if (this.inventory[coin]) {
