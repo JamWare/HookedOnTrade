@@ -61,7 +61,7 @@ let coinToBuy = ref<string>('');
 let coinToShort = ref<string>('');
 let coinToInfo = ref<string>('');
 let coinToSell = ref<string>('');
-const contractsnCoins = ['SHIBUSDTM', 'USDT', 'XBTUSDTM', 'ETHUSDTM', 'SOLUSDTM', 'PEOPLEUSDTM', 'PEPEUSDTM', 'DOGEUSDTM', 'AVAXUSDTM', 'XRPUSDTM', 'LINKUSDTM', 'RUNEUSDTM', 'BBUSDTM'];
+const contractsnCoins = ['SHIBUSDTM', 'USDT', 'XBTUSDTM', 'ETHUSDTM', 'SOLUSDTM', '10000LADYSUSDTM' ,'PEOPLEUSDTM', 'PEPEUSDTM', 'DOGEUSDTM', 'AVAXUSDTM', 'XRPUSDTM', 'LINKUSDTM', 'RUNEUSDTM', 'BBUSDTM'];
 
 const {
   data: buyData,
@@ -118,7 +118,7 @@ const {
 } = await useFetch("/api/resetFile", {
   method: "POST",
   body: { resetInventory: true },
-  transform: (_infoData: any) => _infoData.account,
+  transform: (_infoData: any) => _infoData.inventoryState,
   immediate: false,
   watch: false
 });

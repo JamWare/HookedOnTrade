@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   const prepStore = usePrepStore(pinia);
   const inventoryStore = useCoinInventoryStore(pinia);
   
-  if (body) {
+  if (body && typeof body.resetInventory === 'undefined') {
     prepStore.setMaxDrawdown(body.maxDrawdown);
     prepStore.setStatus(body.status);
 
@@ -19,8 +19,9 @@ export default defineEventHandler(async (event) => {
     streakStore.setLoss(body.loss);
     streakStore.setPreventFirstTrade(body.preventFirstTrade)
     streakStore.setStop(body.stop);
-  
-    if (body.resetInventory && body.resetInventory === true) {
+  }
+  else if (body && body.resetInventory) {
+    if (body.resetInventory === true) {
       inventoryStore.resetInventory();
       return {
         inventoryState: inventoryStore.$state,

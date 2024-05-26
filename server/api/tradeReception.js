@@ -14,8 +14,37 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   const USDT = 156//await accountUSDT();
+  let currency = ""
 
-  const currency = body.currency;
+  if (body.currency.includes("PEPE")){
+    currency = "PEPEUSDTM";
+  } else if (body.currency.includes("SHIB")){
+    currency = "SHIBUSDTM";
+  }
+  else if (body.currency.includes("LADYS")){
+    currency = "10000LADYSUSDTM";
+  }
+  else if (body.currency.includes("SOLUSD")){
+    currency = "SOLUSDTM";
+  }
+  else if (body.currency.includes("DOGE")){
+    currency = "DOGEUSDTM";
+  }
+  else if (body.currency.includes("BTC")){
+    currency = "XBTUSDTM";
+  }
+  else if (body.currency.includes("AVAX")){
+    currency = "AVAXSDTM";
+  }
+  else if (body.currency.includes("AAVE")){
+    currency = "AAVEUSDTM";
+  }
+  else if (body.currency.includes("OPUSD")){
+    currency = "OPUSDTM";
+  }
+   else {
+    currency = body.currency;
+  }
 
   const baseAmount = prepStore.getUSDT;
   const currencyGap = USDT - baseAmount;
@@ -42,8 +71,8 @@ export default defineEventHandler(async (event) => {
   if (size < 1 || stop) {
     prepStore.setRecapMsg("Stopped with : setSize = " + prepStore.getSize + " and stop = " + prepStore.getStop);
         
-    streakStore.stop = true;
-    streakStore.size = 0;
+    streakStore.stop(true);
+    streakStore.setSize(1);
     // Selling all coins
     if(coinInventoryStore.getCoin(currency) >= 1){
       //const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
@@ -72,7 +101,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       response: "stopped with : setSize = " + size + " and stop = " + stop,
-      size: 0,
+      size: 1,
     };
   }
 

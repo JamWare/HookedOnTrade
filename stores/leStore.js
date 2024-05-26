@@ -146,7 +146,7 @@ export const useCoinInventoryStore = defineStore({
                 this.inventory[coin] += quantity;
             }
             else {
-                this.inventory[coin] = quantity;
+                this.inventory[coin] = 1;
             }
         },
         shortCoin(coin, quantity = 1) {
@@ -154,7 +154,7 @@ export const useCoinInventoryStore = defineStore({
                 this.inventory[coin] -= quantity;
             }
             else {
-                this.inventory[coin] = -quantity;
+                this.inventory[coin] = -1;
             }
         },
         removeCoin(coin) {
