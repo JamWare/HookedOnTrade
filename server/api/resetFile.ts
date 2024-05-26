@@ -1,4 +1,4 @@
-import { useStreakStore, usePrepStore } from "@/stores/leStore";
+import { useStreakStore, usePrepStore, useCoinInventoryStore } from "@/stores/leStore";
 import { usePinia } from "../plugins/pinia";
 
 export default defineEventHandler(async (event) => {
@@ -7,10 +7,9 @@ export default defineEventHandler(async (event) => {
   const pinia = usePinia();
   const streakStore = useStreakStore(pinia);
   const prepStore = usePrepStore(pinia);
+  const inventoryStore = useCoinInventoryStore(pinia);
   
-  prepStore.setRecapMsg("Initialisation");
-
-  if (body) {
+  if (body && typeof body.resetInventory === 'undefined') {
     prepStore.setMaxDrawdown(body.maxDrawdown);
     prepStore.setStatus(body.status);
 
@@ -21,8 +20,17 @@ export default defineEventHandler(async (event) => {
     streakStore.setPreventFirstTrade(body.preventFirstTrade)
     streakStore.setStop(body.stop);
   }
+  else if (body && body.resetInventory) {
+    if (body.resetInventory === true) {
+      inventoryStore.resetInventory();
+      return {
+        inventoryState: inventoryStore.$state,
+      };
+    }
+  }
   return {
     datastate: streakStore.$state,
     prepstate: prepStore.$state,
+    inventoryState: inventoryStore.$state,
   };
 });
