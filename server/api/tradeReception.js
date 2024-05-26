@@ -40,7 +40,8 @@ export default defineEventHandler(async (event) => {
   }
 
   if (size < 1 || stop) {
-    prepStore.setRecapMsg("Stopped with : setSize = " + size + " and stop = " + stop);
+    prepStore.setRecapMsg("Stopped with : setSize = " + prepStore.getSize + " and stop = " + prepStore.getStop);
+        
     streakStore.stop = true;
     streakStore.size = 0;
     // Selling all coins
@@ -71,13 +72,15 @@ export default defineEventHandler(async (event) => {
   if (body.tradeType === "long") {
     if (coinInventoryStore.getCoin(currency) < 0) {
       //const buyResp = await long(currency, coinInventoryStore.getCoin(currency) + size, leverage);
-      coinInventoryStore.longCoin(currency, - coinInventoryStore.getCoin(currency));
+      //console.log(-coinInventoryStore.getCoin(currency))
+      coinInventoryStore.longCoin(currency, -coinInventoryStore.getCoin(currency));
     }
     else {
       //console.log("Buy Pass");
       //const buyResp = await long(currency, size, leverage);
       coinInventoryStore.longCoin(currency, size);
     }
+    prepStore.setRecapMsg("Bought coins");
     return {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),
@@ -88,6 +91,7 @@ export default defineEventHandler(async (event) => {
     //   prepStore.setRecapMsg("failed to call sell API & close trade");
     // }
   } else if (body.tradeType === "short") { // DONT FORGET TO CHANGE THE API CALLS AFTER TESTING
+    console.log('Passed by short');
     //coinInventoryStore.shortCoin(currency, size);
     //const buyResp = await short(currency, size, leverage);
     // if (buyResp.code !== "200000") {
@@ -102,6 +106,7 @@ export default defineEventHandler(async (event) => {
       //const buyResp = await short(currency, size, leverage);
       coinInventoryStore.shortCoin(currency, size);
     }
+    prepStore.setRecapMsg("Shorted coins");
     return {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),
@@ -123,9 +128,17 @@ export default defineEventHandler(async (event) => {
       coinInventoryStore.setQuantity(currency, 0);
     }
     else {
+    console.log('Passed by stop');
+
       streakStore.setStop(true);
       prepStore.setRecapMsg("No coins to sell");
+      prepStore.setStatus("Stopped");
+      return {
+        response: "No coins to sell",
+        stop: true,
+      };
     }
+    prepStore.setRecapMsg("Sold coins");
     return {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),

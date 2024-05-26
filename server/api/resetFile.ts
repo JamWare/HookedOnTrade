@@ -9,8 +9,6 @@ export default defineEventHandler(async (event) => {
   const prepStore = usePrepStore(pinia);
   const inventoryStore = useCoinInventoryStore(pinia);
   
-  prepStore.setRecapMsg("Initialisation");
-
   if (body) {
     prepStore.setMaxDrawdown(body.maxDrawdown);
     prepStore.setStatus(body.status);

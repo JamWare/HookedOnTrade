@@ -64,8 +64,8 @@ const {
   refresh: refreshBuy,
 } = await useFetch("/api/tradeReception", {
   method: "POST",
-  body: { tradeType: "long", currency: toRaw(coinToBuy) },
-  transform: (_data) => _data,
+  body: { tradeType: "long", currency: coinToBuy },
+  //transform: (_data) => _data,
   immediate: false,
 });
 
@@ -75,7 +75,7 @@ const {
   refresh: refreshShort,
 } = await useFetch("/api/tradeReception", {
   method: "POST",
-  body: { tradeType: "short", currency: toRaw(coinToShort) },
+  body: { tradeType: "short", currency: coinToShort },
   transform: (_data) => _data,
   immediate: false,
 });
@@ -86,7 +86,7 @@ const {
   refresh: refreshSell,
 } = await useFetch("/api/tradeReception", {
   method: "POST",
-  body: { tradeType: "sell", currency: toRaw(coinToSell) },
+  body: { tradeType: "sell", currency: coinToSell },
   transform: (_data) => _data,
   immediate: false,
 });
@@ -97,20 +97,20 @@ const {
   refresh: refreshInfo,
 } = await useFetch("/api/accInfo", {
   method: "POST",
-  body: { currency: toRaw(coinToInfo) },
+  body: { currency: coinToInfo },
   transform: (_infoData: any) => _infoData.account,
   immediate: false,
 });
 
 const buyHandler = async () => {
   coinToBuy.value = selectedCoin.value;
-  //console.log(coinToBuy.value);
-  await refreshBuy();
+  console.log("buyHandler called");
+    await refreshBuy();
   //console.log(buyData.value);
 };
 const shortHandler = async () => {
   coinToShort.value = selectedCoin.value;
-  await refreshShort();
+    await refreshShort();
   //console.log('shortData.value');
 };
 const sellHandler = async () => {

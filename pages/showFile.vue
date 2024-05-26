@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="submitForm">
     <div
-      class="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 items-center justify-center py-8"
+      class="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 items-center justify-center py-8 px-8"
     >
       <div class="px-4 py-3">
         <label>maxDrawdown</label>
@@ -55,22 +55,26 @@
           value="false"
         />
       </div>
+
+      
     </div>
-    <div>
+    <div class="py-4 px-8">
       <UButton type="submit" size="xl" color="teal">writeDataToFile</UButton>
     </div>
   </form>
-  <div class="grid-cols-2">
-    <div>
-      <UButton @click="execGetData" size="xl" color="blue"
-        >justGetFilesData</UButton
-      >
-    </div>
-    <div>
-      <UButton size="xl" color="orange"
-        ><NuxtLink to="/">Back to base</NuxtLink></UButton
-      >
-    </div>
+  <div class="px-8">
+    <div class="grid-cols-2">
+      <div class="py-4">
+        <UButton @click="execGetData" size="xl" color="blue"
+          >justGetFilesData</UButton
+        >
+      </div>
+      <div class="pt-4">
+        <UButton size="xl" color="orange"
+          ><NuxtLink to="/">Back to base</NuxtLink></UButton
+        >
+      </div>
+  </div>
 
     <div class="py-8">
       <pre>{{ pendingData ? "Data to be written" : returnData }}</pre>
