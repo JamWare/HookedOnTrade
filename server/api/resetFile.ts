@@ -19,6 +19,13 @@ export default defineEventHandler(async (event) => {
     streakStore.setLoss(body.loss);
     streakStore.setPreventFirstTrade(body.preventFirstTrade)
     streakStore.setStop(body.stop);
+  
+    if (body.resetInventory && body.resetInventory === true) {
+      inventoryStore.resetInventory();
+      return {
+        inventoryState: inventoryStore.$state,
+      };
+    }
   }
   return {
     datastate: streakStore.$state,

@@ -146,7 +146,7 @@ export default defineEventHandler(async (event) => {
         coinInventoryStore.setQuantity(currency, 0);
     }
     else if (coinInventoryStore.getCoin(currency) < 0){
-      const sellResp = await long(currency, coinInventoryStore.getCoin(currency), leverage);
+      const sellResp = await long(currency, -coinInventoryStore.getCoin(currency), leverage);
       if (sellResp.code !== "200000") {
         streakStore.stop = true;
         prepStore.setRecapMsg("failed to call sell API & close trade on sell");

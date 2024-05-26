@@ -11,6 +11,8 @@
       <pre>{{ pendingShort ? null : "The short response is: " + JSON.stringify(shortData) }}</pre>
  
       <pre>{{ pendingSell ? null : "The sell response is: " + JSON.stringify(sellData) }}</pre>
+
+      <pre>{{ pendingResetInventory ? null : "The inventory was reseted: " + JSON.stringify(resetInventoryData) }}</pre>
     </div>
   </div>
   <main
@@ -37,6 +39,9 @@
       </div>
       <div class="py-7">
         <UButton @click="infoHandler" size="xl" color="blue">INFO</UButton>
+      </div>
+      <div class="py-7">
+        <UButton @click="resetInventoryHandler" size="xl" color="orange">Reset Inventory</UButton>
       </div>
     </div>
     <div>
@@ -106,6 +111,18 @@ const {
   watch: false
 });
 
+const {
+  data: resetInventoryData,
+  pending: pendingResetInventory,
+  refresh: refreshResetInventory,
+} = await useFetch("/api/resetFile", {
+  method: "POST",
+  body: { resetInventory: true },
+  transform: (_infoData: any) => _infoData.account,
+  immediate: false,
+  watch: false
+});
+
 const buyHandler = async () => {
   coinToBuy.value = selectedCoin.value;
     await refreshBuy();
@@ -121,11 +138,16 @@ const sellHandler = async () => {
 const infoHandler = async () => {
   coinToInfo.value = selectedCoin.value;
 };
+const resetInventoryHandler = async () => {
+  await refreshResetInventory();
+};
+
 watch(pendingInfo, (newVal, oldVal) => {
   if (!newVal && oldVal) {
     pendingBuy.value = true;
     pendingShort.value = true;
     pendingSell.value = true;
+    pendingResetInventory.value = true;
   }
 });
 watch(pendingBuy, (newVal, oldVal) => {
@@ -133,6 +155,7 @@ watch(pendingBuy, (newVal, oldVal) => {
     pendingInfo.value = true;
     pendingShort.value = true;
     pendingSell.value = true;
+    pendingResetInventory.value = true;
   }
 });
 watch(pendingShort, (newVal, oldVal) => {
@@ -140,6 +163,7 @@ watch(pendingShort, (newVal, oldVal) => {
     pendingInfo.value = true;
     pendingBuy.value = true;
     pendingSell.value = true;
+    pendingResetInventory.value = true;
   }
 });
 watch(pendingSell, (newVal, oldVal) => {
@@ -147,6 +171,15 @@ watch(pendingSell, (newVal, oldVal) => {
     pendingInfo.value = true;
     pendingShort.value = true;
     pendingBuy.value = true;
+    pendingResetInventory.value = true;
+  }
+});
+watch(pendingResetInventory, (newVal, oldVal) => {
+  if (!newVal && oldVal) {
+    pendingInfo.value = true;
+    pendingShort.value = true;
+    pendingBuy.value = true;
+    pendingSell.value = true;
   }
 });
 

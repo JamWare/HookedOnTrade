@@ -177,6 +177,9 @@ export const useCoinInventoryStore = defineStore({
                 console.error(`Coin ${coin} not found in inventory.`);
             }
         },
+        resetInventory() {
+            this.inventory = {};
+        }
     },
     getters: {
         getInventory: (state) => {
