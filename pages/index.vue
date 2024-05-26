@@ -51,12 +51,12 @@
 
 <script setup lang="ts">
 
-const selectedCoin = ref<string>('SOLUSDTM');
+const selectedCoin = ref<string>('PEOPLEUSDTM');
 let coinToBuy = ref<string>('');
 let coinToShort = ref<string>('');
 let coinToInfo = ref<string>('');
 let coinToSell = ref<string>('');
-const contractsnCoins = ['SHIBUSDTM', 'USDT', 'XBTUSDTM', 'ETHUSDTM', 'SOLUSDTM', 'PEPEUSDTM', 'DOGEUSDTM', 'AVAXUSDTM', 'XRPUSDTM', 'LINKUSDTM', 'RUNEUSDTM', 'BBUSDTM'];
+const contractsnCoins = ['SHIBUSDTM', 'USDT', 'XBTUSDTM', 'ETHUSDTM', 'SOLUSDTM', 'PEOPLEUSDTM', 'PEPEUSDTM', 'DOGEUSDTM', 'AVAXUSDTM', 'XRPUSDTM', 'LINKUSDTM', 'RUNEUSDTM', 'BBUSDTM'];
 
 const {
   data: buyData,
@@ -108,24 +108,18 @@ const {
 
 const buyHandler = async () => {
   coinToBuy.value = selectedCoin.value;
-  console.log("buyHandler called");
     await refreshBuy();
-  //console.log(buyData.value);
 };
 const shortHandler = async () => {
   coinToShort.value = selectedCoin.value;
     await refreshShort();
-  //console.log('shortData.value');
 };
 const sellHandler = async () => {
   coinToSell.value = selectedCoin.value;
   await refreshSell();
-  // console.log(sellData.value);
 };
 const infoHandler = async () => {
   coinToInfo.value = selectedCoin.value;
-  //await refreshInfo();
-  //console.log(infoData.value);
 };
 watch(pendingInfo, (newVal, oldVal) => {
   if (!newVal && oldVal) {

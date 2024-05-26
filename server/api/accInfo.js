@@ -21,8 +21,8 @@ export default defineEventHandler(async (event) => {
     const accountUSDT = infoResp.data.accountEquity; 
 
     //Helpers
-    //futuresSDK.futuresRiskLimit('XBTUSDTM', console.log);
-    //futuresSDK.futuresContractDetail('SHIBUSDTM', console.log);
+    //futuresSDK.futuresRiskLimit('XBTUSDTM', console.lo);
+    //futuresSDK.futuresContractDetail('SHIBUSDTM', console.lo);
 
     
     return { "account": accountUSDT }; 
