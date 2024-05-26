@@ -67,6 +67,7 @@ const {
   body: { tradeType: "long", currency: coinToBuy },
   //transform: (_data) => _data,
   immediate: false,
+  watch: false
 });
 
 const {
@@ -78,6 +79,7 @@ const {
   body: { tradeType: "short", currency: coinToShort },
   transform: (_data) => _data,
   immediate: false,
+  watch: false
 });
 
 const {
@@ -89,6 +91,7 @@ const {
   body: { tradeType: "sell", currency: coinToSell },
   transform: (_data) => _data,
   immediate: false,
+  watch: false
 });
 
 const {
@@ -100,6 +103,7 @@ const {
   body: { currency: coinToInfo },
   transform: (_infoData: any) => _infoData.account,
   immediate: false,
+  watch: false
 });
 
 const buyHandler = async () => {
