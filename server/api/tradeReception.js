@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
     currency = "XBTUSDTM";
   }
   else if (body.currency.includes("AVAX")){
-    currency = "AVAXSDTM";
+    currency = "AVAXUSDTM";
   }
   else if (body.currency.includes("AAVE")){
     currency = "AAVEUSDTM";
