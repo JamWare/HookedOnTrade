@@ -42,6 +42,21 @@ export default defineEventHandler(async (event) => {
   else if (body.currency.includes("OPUSD")){
     currency = "OPUSDTM";
   }
+  else if (body.currency.includes("ETH")){
+    currency = "ETHUSDTM";
+  }
+  else if (body.currency.includes("FLOKI")){
+    currency = "FLOKIUSDTM";
+  }
+  else if (body.currency.includes("ADA")){
+    currency = "ADAUSDTM";
+  }
+  else if (body.currency.includes("DOT")){
+    currency = "DOTUSDTM";
+  }
+  else if (body.currency.includes("BNB")){
+    currency = "BNBUSDTM";
+  }
    else {
     currency = body.currency;
   }
