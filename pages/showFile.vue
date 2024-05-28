@@ -84,7 +84,7 @@
 </template>
 <script setup>
 const inputs = ref({
-  USDT: 156,
+  USDT: 153.5,
   maxDrawdown: 5,
   status: "neutral",
   size: 1,

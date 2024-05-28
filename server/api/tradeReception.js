@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
 
-  const USDT = 156//await accountUSDT();
+  const USDT = 153.77//await accountUSDT();
   let currency = ""
 
   if (body.currency.includes("PEPE")){
@@ -57,6 +57,12 @@ export default defineEventHandler(async (event) => {
   else if (body.currency.includes("BNB")){
     currency = "BNBUSDTM";
   }
+  else if (body.currency.includes("MEW")){
+    currency = "MEWUSDTM";
+  }
+  else if (body.currency.includes("RUNE")){
+    currency = "RUNEUSDTM";
+  }
    else {
     currency = body.currency;
   }
@@ -90,13 +96,13 @@ export default defineEventHandler(async (event) => {
     streakStore.setSize(1);
     // Selling all coins
     if(coinInventoryStore.getCoin(currency) >= 1){
-      //const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
+      const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
       coinInventoryStore.setQuantity(currency, 0);
-      // if (sellResp.code !== "200000") {
-      //   coinInventoryStore.setQuantity(coinInventoryStore.getCoin(currency) + 1);
-      //   streakStore.stop = true;
-      //   prepStore.setRecapMsg("failed to call sell API & close trade");
-      // }
+      if (sellResp.code !== "200000") {
+        coinInventoryStore.setQuantity(coinInventoryStore.getCoin(currency) + 1);
+        streakStore.stop = true;
+        prepStore.setRecapMsg("failed to call sell API & close trade");
+      }
     }
     else if (coinInventoryStore.getCoin(currency) < 0){
       const shortResp = await long(currency, coinInventoryStore.getCoin(currency), leverage);
@@ -123,6 +129,7 @@ export default defineEventHandler(async (event) => {
   if (body.tradeType === "long") {
     if (coinInventoryStore.getCoin(currency) < 0) {
       const buyResp = await long(currency, -coinInventoryStore.getCoin(currency) + size, leverage);
+      coinInventoryStore.longCoin(currency, -coinInventoryStore.getCoin(currency));
       if (buyResp.code !== "200000") {
         streakStore.stop = true;
         prepStore.setRecapMsg("failed to call buy API & close trade on long");
@@ -130,7 +137,12 @@ export default defineEventHandler(async (event) => {
           response: "failed to call buy API & close trade",
         };
       }
-      coinInventoryStore.longCoin(currency, -coinInventoryStore.getCoin(currency));
+    }
+    else if (coinInventoryStore.getCoin(currency) > 0) {
+      prepStore.setRecapMsg("Position already open");
+      return {
+        response: "Position already open",
+      } 
     }
     else {
       const buyResp = await long(currency, size, leverage);
@@ -141,7 +153,7 @@ export default defineEventHandler(async (event) => {
           response: "failed to call buy API & close trade",
         };
       }
-      coinInventoryStore.longCoin(currency, size);
+      coinInventoryStore.longCoin(currency, size);  
     }
     prepStore.setRecapMsg("Bought coins");
     return {
@@ -159,6 +171,12 @@ export default defineEventHandler(async (event) => {
          };
        }
       coinInventoryStore.shortCoin(currency, coinInventoryStore.getCoin(currency));
+    }
+    else if (coinInventoryStore.getCoin(currency) < 0) {
+      prepStore.setRecapMsg("Position already open");
+      return {
+        response: "Position already open",
+      }
     }
     else {
       const shortResp = await short(currency, size, leverage);

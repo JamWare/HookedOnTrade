@@ -40,9 +40,9 @@
       <div class="py-7">
         <UButton @click="infoHandler" size="xl" color="blue">INFO</UButton>
       </div>
-      <div class="py-7">
+      <!-- <div class="py-7">
         <UButton @click="resetInventoryHandler" size="xl" color="orange">Reset Inventory</UButton>
-      </div>
+      </div> -->
     </div>
     <div>
       <div class="pt-7">
@@ -61,7 +61,7 @@ let coinToBuy = ref<string>('');
 let coinToShort = ref<string>('');
 let coinToInfo = ref<string>('');
 let coinToSell = ref<string>('');
-const contractsnCoins = ['SHIBUSDTM', 'USDT', 'XBTUSDTM', 'ETHUSDTM', 'SOLUSDTM', 'OPUSDTM', '10000LADYSUSDTM' ,'PEOPLEUSDTM', 'PEPEUSDTM', 'DOGEUSDTM', 'AVAXUSDTM', 'XRPUSDTM', 'LINKUSDTM', 'RUNEUSDTM', 'BBUSDTM'];
+const contractsnCoins = ['SHIBUSDTM', 'RUNEUSDTM', 'MEWUSDTM', 'USDT', 'XBTUSDTM', 'ETHUSDTM', 'SOLUSDTM', 'OPUSDTM', '10000LADYSUSDTM' ,'PEOPLEUSDTM', 'PEPEUSDTM', 'DOGEUSDTM', 'AVAXUSDTM', 'XRPUSDTM', 'LINKUSDTM', 'RUNEUSDTM', 'BBUSDTM'];
 
 const {
   data: buyData,
@@ -138,9 +138,9 @@ const sellHandler = async () => {
 const infoHandler = async () => {
   coinToInfo.value = selectedCoin.value;
 };
-const resetInventoryHandler = async () => {
-  await refreshResetInventory();
-};
+// const resetInventoryHandler = async () => {
+//   await refreshResetInventory();
+// };
 
 watch(pendingInfo, (newVal, oldVal) => {
   if (!newVal && oldVal) {
