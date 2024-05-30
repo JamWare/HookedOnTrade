@@ -63,6 +63,9 @@ export default defineEventHandler(async (event) => {
   else if (body.currency.includes("RUNE")){
     currency = "RUNEUSDTM";
   }
+  else if (body.currency.includes("PEOPLE")){
+    currency = "PEOPLEUSDTM";
+  }
    else {
     currency = body.currency;
   }
@@ -92,7 +95,7 @@ export default defineEventHandler(async (event) => {
   if (size < 1 || stop) {
     prepStore.setRecapMsg("Stopped with : setSize = " + prepStore.getSize + " and stop = " + prepStore.getStop);
         
-    streakStore.stop(true);
+    streakStore.setStop(true);
     streakStore.setSize(1);
     // Selling all coins
     if(coinInventoryStore.getCoin(currency) >= 1){
@@ -100,14 +103,14 @@ export default defineEventHandler(async (event) => {
       coinInventoryStore.setQuantity(currency, 0);
       if (sellResp.code !== "200000") {
         coinInventoryStore.setQuantity(coinInventoryStore.getCoin(currency) + 1);
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade");
       }
     }
     else if (coinInventoryStore.getCoin(currency) < 0){
       const shortResp = await long(currency, coinInventoryStore.getCoin(currency), leverage);
       if (shortResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on sell");
         return {
           response: "failed to call buy API & close trade",
@@ -131,7 +134,7 @@ export default defineEventHandler(async (event) => {
       const buyResp = await long(currency, -coinInventoryStore.getCoin(currency) + size, leverage);
       coinInventoryStore.longCoin(currency, -coinInventoryStore.getCoin(currency));
       if (buyResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call buy API & close trade on long");
         return {
           response: "failed to call buy API & close trade",
@@ -147,7 +150,7 @@ export default defineEventHandler(async (event) => {
     else {
       const buyResp = await long(currency, size, leverage);
       if (buyResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call buy API & close trade on long");
         return {
           response: "failed to call buy API & close trade",
@@ -164,7 +167,7 @@ export default defineEventHandler(async (event) => {
     if (coinInventoryStore.getCoin(currency) > 0) {
       const shortResp = await short(currency, coinInventoryStore.getCoin(currency) + size, leverage);
       if (shortResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on short");
         return {
          response: "failed to call buy API & close trade on short",
@@ -181,7 +184,7 @@ export default defineEventHandler(async (event) => {
     else {
       const shortResp = await short(currency, size, leverage);
       if (shortResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on short");
         return {
          response: "failed to call buy API & close trade on short",
@@ -199,10 +202,11 @@ export default defineEventHandler(async (event) => {
     if(coinInventoryStore.getCoin(currency) >= 1){
       const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
        if (sellResp.code !== "200000") {
-         streakStore.stop = true;
+         streakStore.setStop(true);
          prepStore.setRecapMsg("failed to call sell API & close trade on sell");
          return {
           response: "failed to call buy API & close trade on sell",
+          apiResp: sellResp,
           };
         }
         coinInventoryStore.setQuantity(currency, 0);
@@ -210,10 +214,11 @@ export default defineEventHandler(async (event) => {
     else if (coinInventoryStore.getCoin(currency) < 0){
       const sellResp = await long(currency, -coinInventoryStore.getCoin(currency), leverage);
       if (sellResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on sell");
         return {
           response: "failed to call buy API & close trade on sell",
+          apiResp: sellResp,
         };
       }
       coinInventoryStore.setQuantity(currency, 0);

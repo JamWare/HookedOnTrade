@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   }
   else if (body && body.resetInventory) {
     if (body.resetInventory === true) {
-      // inventoryStore.resetInventory();
+       inventoryStore.resetInventory();
       return {
         inventoryState: inventoryStore.$state,
       };
