@@ -5,11 +5,11 @@
     >
       <div class="px-4 py-3">
         <label>maxDrawdown</label>
-        <UInput disabled type="number" v-model="inputs.maxDrawdown" />
+        <UInput type="number" v-model="inputs.maxDrawdown" />
       </div>
       <div class="px-4 py-3">
         <label>prepUSDT</label>
-        <UInput disabled v-model="inputs.USDT" />
+        <UInput v-model="inputs.USDT" />
       </div>
       <div class="px-4 py-3">
         <label>status</label>
@@ -17,11 +17,11 @@
       </div>
       <div class="px-4 py-3">
         <label>size</label>
-        <UInput disabled type="number" v-model="inputs.size" />
+        <UInput type="number" v-model="inputs.size" />
       </div>
       <div class="px-4 py-3">
         <label>leverage</label>
-        <UInput disabled type="number" v-model="inputs.leverage" />
+        <UInput type="number" v-model="inputs.leverage" />
       </div>
       <div class="px-4 py-3">
         <label>won</label>

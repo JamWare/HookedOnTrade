@@ -1,10 +1,13 @@
-import { accountUSDT } from "./accInfo";
 import { useStreakStore, usePrepStore, useCoinInventoryStore } from "@/stores/leStore";
 import { usePinia } from "../plugins/pinia";
 import { long } from "./aBuy";
 import { short } from "./aShort";
+import { serverSupabaseClient } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
+
+  const supabase = await serverSupabaseClient(event)
+
   const pinia = usePinia();
 
   const streakStore = useStreakStore(pinia);
@@ -15,6 +18,39 @@ export default defineEventHandler(async (event) => {
 
   const USDT = 153.77//await accountUSDT();
   let currency = ""
+
+const upsertToBase = async () => {
+  const { data : dataToBase, error } = await supabase
+  .from('StoreGrabber')
+  .upsert({ id: 1,
+    streakStore: streakStore.$state, 
+    prepStore: prepStore.$state, 
+    coinInventoryStore: coinInventoryStore.$state})
+  .select()
+}
+
+const getFromBase = async () => {
+  const { data: dataFromBase, error } = await supabase
+  .from('StoreGrabber')
+  .select()
+
+  if (dataFromBase){
+    streakStore.$patch(dataFromBase[0].streakStore)
+    prepStore.$patch(dataFromBase[0].prepStore)
+    coinInventoryStore.$patch(dataFromBase[0].coinInventoryStore)
+  }
+}
+
+await getFromBase();
+
+  if (body.info === true){
+    return {
+      streakStore: streakStore.$state,
+      prepStore: prepStore.$state,
+      coinInventoryStore: coinInventoryStore.$state,
+    }
+  }
+  
 
   if (body.currency.includes("PEPE")){
     currency = "PEPEUSDTM";
@@ -63,6 +99,9 @@ export default defineEventHandler(async (event) => {
   else if (body.currency.includes("RUNE")){
     currency = "RUNEUSDTM";
   }
+  else if (body.currency.includes("PEOPLE")){
+    currency = "PEOPLEUSDTM";
+  }
    else {
     currency = body.currency;
   }
@@ -84,6 +123,7 @@ export default defineEventHandler(async (event) => {
   if (body && body.tradeType !== "long" && body.tradeType !== "short" && body.tradeType !== "sell") {
     streakStore.setStop(true);
     prepStore.setRecapMsg("Body content not recognized");
+    upsertToBase();
     return {
       response: "Body content not recognized",
     };
@@ -92,7 +132,7 @@ export default defineEventHandler(async (event) => {
   if (size < 1 || stop) {
     prepStore.setRecapMsg("Stopped with : setSize = " + prepStore.getSize + " and stop = " + prepStore.getStop);
         
-    streakStore.stop(true);
+    streakStore.setStop(true);
     streakStore.setSize(1);
     // Selling all coins
     if(coinInventoryStore.getCoin(currency) >= 1){
@@ -100,15 +140,16 @@ export default defineEventHandler(async (event) => {
       coinInventoryStore.setQuantity(currency, 0);
       if (sellResp.code !== "200000") {
         coinInventoryStore.setQuantity(coinInventoryStore.getCoin(currency) + 1);
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade");
       }
     }
     else if (coinInventoryStore.getCoin(currency) < 0){
       const shortResp = await long(currency, coinInventoryStore.getCoin(currency), leverage);
       if (shortResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on sell");
+        upsertToBase();
         return {
           response: "failed to call buy API & close trade",
         };
@@ -120,6 +161,7 @@ export default defineEventHandler(async (event) => {
       prepStore.setRecapMsg("No coins to sell");
     }
 
+    upsertToBase();
     return {
       response: "stopped with : setSize = " + size + " and stop = " + stop,
       size: 1,
@@ -131,8 +173,9 @@ export default defineEventHandler(async (event) => {
       const buyResp = await long(currency, -coinInventoryStore.getCoin(currency) + size, leverage);
       coinInventoryStore.longCoin(currency, -coinInventoryStore.getCoin(currency));
       if (buyResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call buy API & close trade on long");
+        upsertToBase();
         return {
           response: "failed to call buy API & close trade",
         };
@@ -140,6 +183,7 @@ export default defineEventHandler(async (event) => {
     }
     else if (coinInventoryStore.getCoin(currency) > 0) {
       prepStore.setRecapMsg("Position already open");
+      upsertToBase();
       return {
         response: "Position already open",
       } 
@@ -147,8 +191,9 @@ export default defineEventHandler(async (event) => {
     else {
       const buyResp = await long(currency, size, leverage);
       if (buyResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call buy API & close trade on long");
+        upsertToBase();
         return {
           response: "failed to call buy API & close trade",
         };
@@ -156,6 +201,7 @@ export default defineEventHandler(async (event) => {
       coinInventoryStore.longCoin(currency, size);  
     }
     prepStore.setRecapMsg("Bought coins");
+    upsertToBase();
     return {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),
@@ -164,8 +210,9 @@ export default defineEventHandler(async (event) => {
     if (coinInventoryStore.getCoin(currency) > 0) {
       const shortResp = await short(currency, coinInventoryStore.getCoin(currency) + size, leverage);
       if (shortResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on short");
+        upsertToBase();
         return {
          response: "failed to call buy API & close trade on short",
          };
@@ -174,6 +221,7 @@ export default defineEventHandler(async (event) => {
     }
     else if (coinInventoryStore.getCoin(currency) < 0) {
       prepStore.setRecapMsg("Position already open");
+      upsertToBase();
       return {
         response: "Position already open",
       }
@@ -181,8 +229,9 @@ export default defineEventHandler(async (event) => {
     else {
       const shortResp = await short(currency, size, leverage);
       if (shortResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on short");
+        upsertToBase();
         return {
          response: "failed to call buy API & close trade on short",
          };
@@ -190,6 +239,7 @@ export default defineEventHandler(async (event) => {
       coinInventoryStore.shortCoin(currency, size);
     }
     prepStore.setRecapMsg("Shorted coins");
+    upsertToBase();
     return {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),
@@ -199,10 +249,12 @@ export default defineEventHandler(async (event) => {
     if(coinInventoryStore.getCoin(currency) >= 1){
       const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
        if (sellResp.code !== "200000") {
-         streakStore.stop = true;
+         streakStore.setStop(true);
          prepStore.setRecapMsg("failed to call sell API & close trade on sell");
+         upsertToBase();
          return {
           response: "failed to call buy API & close trade on sell",
+          apiResp: sellResp,
           };
         }
         coinInventoryStore.setQuantity(currency, 0);
@@ -210,10 +262,12 @@ export default defineEventHandler(async (event) => {
     else if (coinInventoryStore.getCoin(currency) < 0){
       const sellResp = await long(currency, -coinInventoryStore.getCoin(currency), leverage);
       if (sellResp.code !== "200000") {
-        streakStore.stop = true;
+        streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on sell");
+        upsertToBase();
         return {
           response: "failed to call buy API & close trade on sell",
+          apiResp: sellResp,
         };
       }
       coinInventoryStore.setQuantity(currency, 0);
@@ -222,12 +276,14 @@ export default defineEventHandler(async (event) => {
       streakStore.setStop(true);
       prepStore.setRecapMsg("No coins to sell");
       prepStore.setStatus("Stopped");
+      upsertToBase();
       return {
         response: "No coins to sell",
         stop: true,
       };
     }
     prepStore.setRecapMsg("Sold coins");
+    upsertToBase();
     return {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),
@@ -239,6 +295,7 @@ export default defineEventHandler(async (event) => {
     streakStore.setSize(0);
     prepStore.setRecapMsg("Drawdown exceeded");
     prepStore.setLastMultiplier(multiplier);
+    upsertToBase();
     return {
       response: "Drawdown exceeded",
       size: 0,
@@ -310,7 +367,8 @@ export default defineEventHandler(async (event) => {
   // size = dataFile.size;
   // leverage = dataFile.leverage;
   // await fileWrite("prepnRecap.json", prepFile);
-
+  
+  upsertToBase();
   return {
     response: "Going good",
   };
