@@ -1,14 +1,6 @@
 <script setup>
 const supabase = useSupabaseClient();
 
-// const signInWithPaswd = async () => {
-//   const { error } = await supabase.auth.signInWithPassword({
-//     email: email.value,
-//     password: password.value,
-//   })
-//   if (error) console.log(error)
-// }
-
 const items = [
   {
     key: "login",
@@ -27,48 +19,23 @@ const accountForm = reactive({ mail: "", password: "" });
 const newUserForm = reactive({ newUserName: "", newUserPassword: "" });
 
 const onSubmit = async (form) => {
-  console.log("Submitted form:", form);
   if (form.password) {
     const { error } = await supabase.auth.signInWithPassword({
     email: accountForm.mail,
     password: accountForm.password,
   })
   if (error) console.log(error)
-  // console.log(data)
-  // console.log("accountForm.mail: ", form.mail);
   } else {
       const { data, error } = await supabase.auth.signUp({
       email: newUserForm.newUserName,
       password: newUserForm.newUserPassword,
     })
     if (error) console.log(error)
-    // console.log(data);
-  //   console.log(form)
-  // console.log("newUserForm.newUserName: ", form.newUserName);
-  // console.log("newUserForm.newUserPassword: ", form.newUserPassword);
   }
 }
 
 </script>
 <template>
-  <!-- <div>
-    <UButton @click="signInWithPaswd">
-      Sign In with E-Mail
-    </UButton>
-    <UInput
-      v-model="email"
-      type="email"
-      placeholder="E-Mail"
-      required
-    />
-    <UInput
-      v-model="password"
-      type="password"
-      placeholder="Password"
-      required
-    />
-  </div> -->
-
   <UTabs :items="items" class="w-full">
     <template #item="{ item }">
       <UCard
@@ -97,13 +64,14 @@ const onSubmit = async (form) => {
         </div>
         <div v-else-if="item.key === 'signUp'" class="space-y-3">
           <UFormGroup label="Email" name="username" required>
-            <UInput v-model="newUserForm.newUserName" required />
+            <UInput v-model="newUserForm.newUserName" required disabled />
           </UFormGroup>
           <UFormGroup label="Password" name="password" required>
             <UInput
               v-model="newUserForm.newUserPassword"
               type="password"
               required
+              disabled
             />
           </UFormGroup>
         </div>

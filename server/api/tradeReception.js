@@ -1,4 +1,3 @@
-import { accountUSDT } from "./accInfo";
 import { useStreakStore, usePrepStore, useCoinInventoryStore } from "@/stores/leStore";
 import { usePinia } from "../plugins/pinia";
 import { long } from "./aBuy";
@@ -20,16 +19,29 @@ export default defineEventHandler(async (event) => {
   const USDT = 153.77//await accountUSDT();
   let currency = ""
 
-
-const { data, error } = await supabase
+const upsertToBase = async () => {
+  const { data : dataToBase, error } = await supabase
   .from('StoreGrabber')
   .upsert({ id: 1,
     streakStore: streakStore.$state, 
     prepStore: prepStore.$state, 
     coinInventoryStore: coinInventoryStore.$state})
   .select()
+}
 
-  console.log("data: ",data, ", error: ",error)
+const getFromBase = async () => {
+  const { data: dataFromBase, error } = await supabase
+  .from('StoreGrabber')
+  .select()
+
+  if (dataFromBase){
+    streakStore.$patch(dataFromBase[0].streakStore)
+    prepStore.$patch(dataFromBase[0].prepStore)
+    coinInventoryStore.$patch(dataFromBase[0].coinInventoryStore)
+  }
+}
+
+await getFromBase();
 
   if (body.info === true){
     return {
@@ -38,6 +50,7 @@ const { data, error } = await supabase
       coinInventoryStore: coinInventoryStore.$state,
     }
   }
+  
 
   if (body.currency.includes("PEPE")){
     currency = "PEPEUSDTM";
@@ -110,6 +123,7 @@ const { data, error } = await supabase
   if (body && body.tradeType !== "long" && body.tradeType !== "short" && body.tradeType !== "sell") {
     streakStore.setStop(true);
     prepStore.setRecapMsg("Body content not recognized");
+    upsertToBase();
     return {
       response: "Body content not recognized",
     };
@@ -135,6 +149,7 @@ const { data, error } = await supabase
       if (shortResp.code !== "200000") {
         streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on sell");
+        upsertToBase();
         return {
           response: "failed to call buy API & close trade",
         };
@@ -146,6 +161,7 @@ const { data, error } = await supabase
       prepStore.setRecapMsg("No coins to sell");
     }
 
+    upsertToBase();
     return {
       response: "stopped with : setSize = " + size + " and stop = " + stop,
       size: 1,
@@ -159,6 +175,7 @@ const { data, error } = await supabase
       if (buyResp.code !== "200000") {
         streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call buy API & close trade on long");
+        upsertToBase();
         return {
           response: "failed to call buy API & close trade",
         };
@@ -166,6 +183,7 @@ const { data, error } = await supabase
     }
     else if (coinInventoryStore.getCoin(currency) > 0) {
       prepStore.setRecapMsg("Position already open");
+      upsertToBase();
       return {
         response: "Position already open",
       } 
@@ -175,6 +193,7 @@ const { data, error } = await supabase
       if (buyResp.code !== "200000") {
         streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call buy API & close trade on long");
+        upsertToBase();
         return {
           response: "failed to call buy API & close trade",
         };
@@ -182,6 +201,7 @@ const { data, error } = await supabase
       coinInventoryStore.longCoin(currency, size);  
     }
     prepStore.setRecapMsg("Bought coins");
+    upsertToBase();
     return {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),
@@ -192,6 +212,7 @@ const { data, error } = await supabase
       if (shortResp.code !== "200000") {
         streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on short");
+        upsertToBase();
         return {
          response: "failed to call buy API & close trade on short",
          };
@@ -200,6 +221,7 @@ const { data, error } = await supabase
     }
     else if (coinInventoryStore.getCoin(currency) < 0) {
       prepStore.setRecapMsg("Position already open");
+      upsertToBase();
       return {
         response: "Position already open",
       }
@@ -209,6 +231,7 @@ const { data, error } = await supabase
       if (shortResp.code !== "200000") {
         streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on short");
+        upsertToBase();
         return {
          response: "failed to call buy API & close trade on short",
          };
@@ -216,6 +239,7 @@ const { data, error } = await supabase
       coinInventoryStore.shortCoin(currency, size);
     }
     prepStore.setRecapMsg("Shorted coins");
+    upsertToBase();
     return {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),
@@ -227,6 +251,7 @@ const { data, error } = await supabase
        if (sellResp.code !== "200000") {
          streakStore.setStop(true);
          prepStore.setRecapMsg("failed to call sell API & close trade on sell");
+         upsertToBase();
          return {
           response: "failed to call buy API & close trade on sell",
           apiResp: sellResp,
@@ -239,6 +264,7 @@ const { data, error } = await supabase
       if (sellResp.code !== "200000") {
         streakStore.setStop(true);
         prepStore.setRecapMsg("failed to call sell API & close trade on sell");
+        upsertToBase();
         return {
           response: "failed to call buy API & close trade on sell",
           apiResp: sellResp,
@@ -250,12 +276,14 @@ const { data, error } = await supabase
       streakStore.setStop(true);
       prepStore.setRecapMsg("No coins to sell");
       prepStore.setStatus("Stopped");
+      upsertToBase();
       return {
         response: "No coins to sell",
         stop: true,
       };
     }
     prepStore.setRecapMsg("Sold coins");
+    upsertToBase();
     return {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),
@@ -267,6 +295,7 @@ const { data, error } = await supabase
     streakStore.setSize(0);
     prepStore.setRecapMsg("Drawdown exceeded");
     prepStore.setLastMultiplier(multiplier);
+    upsertToBase();
     return {
       response: "Drawdown exceeded",
       size: 0,
@@ -338,7 +367,8 @@ const { data, error } = await supabase
   // size = dataFile.size;
   // leverage = dataFile.leverage;
   // await fileWrite("prepnRecap.json", prepFile);
-
+  
+  upsertToBase();
   return {
     response: "Going good",
   };
