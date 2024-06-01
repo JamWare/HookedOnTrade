@@ -3,8 +3,12 @@ import { useStreakStore, usePrepStore, useCoinInventoryStore } from "@/stores/le
 import { usePinia } from "../plugins/pinia";
 import { long } from "./aBuy";
 import { short } from "./aShort";
+import { serverSupabaseClient } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
+
+  const supabase = await serverSupabaseClient(event)
+
   const pinia = usePinia();
 
   const streakStore = useStreakStore(pinia);
@@ -15,6 +19,25 @@ export default defineEventHandler(async (event) => {
 
   const USDT = 153.77//await accountUSDT();
   let currency = ""
+
+
+const { data, error } = await supabase
+  .from('StoreGrabber')
+  .upsert({ id: 1,
+    streakStore: streakStore.$state, 
+    prepStore: prepStore.$state, 
+    coinInventoryStore: coinInventoryStore.$state})
+  .select()
+
+  console.log("data: ",data, ", error: ",error)
+
+  if (body.info === true){
+    return {
+      streakStore: streakStore.$state,
+      prepStore: prepStore.$state,
+      coinInventoryStore: coinInventoryStore.$state,
+    }
+  }
 
   if (body.currency.includes("PEPE")){
     currency = "PEPEUSDTM";

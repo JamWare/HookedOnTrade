@@ -43,6 +43,9 @@
       <div class="py-7">
         <UButton @click="resetInventoryHandler" size="xl" color="orange">Reset Inventory</UButton>
       </div>
+      <div class="py-7">
+        <UButton @click="signout" size="xl" color="red">Sign-out</UButton>
+      </div>
     </div>
     <div>
       <div class="pt-7">
@@ -55,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+const supabase = useSupabaseClient()
 
 const selectedCoin = ref<string>('PEOPLEUSDTM');
 let coinToBuy = ref<string>('');
@@ -103,10 +107,10 @@ const {
   data: infoData,
   pending: pendingInfo,
   refresh: refreshInfo,
-} = await useFetch("/api/accInfo", {
+} = await useFetch("/api/tradeReception", {
   method: "POST",
-  body: { currency: coinToInfo },
-  transform: (_infoData: any) => _infoData.account,
+  body: { info: true },
+  //transform: (_infoData: any) => _infoData,
   immediate: false,
   watch: false
 });
@@ -136,10 +140,13 @@ const sellHandler = async () => {
   await refreshSell();
 };
 const infoHandler = async () => {
-  coinToInfo.value = selectedCoin.value;
+  await refreshInfo();
 };
 const resetInventoryHandler = async () => {
   await refreshResetInventory();
+};
+const signout = async () => {
+  await supabase.auth.signOut();
 };
 
 watch(pendingInfo, (newVal, oldVal) => {
