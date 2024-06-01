@@ -1,10 +1,10 @@
 import { useStreakStore, usePrepStore, useCoinInventoryStore } from "@/stores/leStore";
 import { usePinia } from "../plugins/pinia";
-import { serverSupabaseUser } from '#supabase/server'
+import { serverSupabaseClient } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const supabase = serverSupabaseUser(event)
+  const supabase = await serverSupabaseClient(event)
 
   const pinia = usePinia();
   const streakStore = useStreakStore(pinia);
@@ -13,8 +13,7 @@ export default defineEventHandler(async (event) => {
 
   const getFromBase = async () => {
     const { data: dataFromBase, error } = await supabase
-    .from('StoreGrabber')
-    .select()
+    .from('StoreGrabber').select()
 
     if (dataFromBase){
       streakStore.$patch(dataFromBase[0].streakStore)
