@@ -1,10 +1,10 @@
 import { useStreakStore, usePrepStore, useCoinInventoryStore } from "@/stores/leStore";
 import { usePinia } from "../plugins/pinia";
-import { serverSupabaseUser } from '#supabase/server'
+import { serverSupabaseClient } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const supabase = serverSupabaseUser(event)
+  const supabase = await serverSupabaseClient(event)
 
   const pinia = usePinia();
   const streakStore = useStreakStore(pinia);
