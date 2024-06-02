@@ -65,7 +65,7 @@ let coinToBuy = ref<string>('');
 let coinToShort = ref<string>('');
 let coinToInfo = ref<string>('');
 let coinToSell = ref<string>('');
-const contractsnCoins = ['SHIBUSDTM', 'RUNEUSDTM', 'MEWUSDTM', 'USDT', 'XBTUSDTM', 'ETHUSDTM', 'SOLUSDTM', 'OPUSDTM', '10000LADYSUSDTM' ,'PEOPLEUSDTM', 'PEPEUSDTM', 'DOGEUSDTM', 'AVAXUSDTM', 'XRPUSDTM', 'LINKUSDTM', 'RUNEUSDTM', 'BBUSDTM'];
+const contractsnCoins = ['SHIBUSDTM', "SAGAUSDTM", 'RUNEUSDTM', 'MEWUSDTM', 'USDT',"ALICEUSDTM", 'XBTUSDTM', 'ETHUSDTM', 'SOLUSDTM', "OCEANUSDTM", "DRIFTUSDTM", "BRETTUSDTM", 'OPUSDTM', '10000LADYSUSDTM' ,'PEOPLEUSDTM', 'PEPEUSDTM', 'DOGEUSDTM', 'AVAXUSDTM', 'XRPUSDTM', 'LINKUSDTM', 'RUNEUSDTM', 'BBUSDTM'];
 
 const {
   data: buyData,
