@@ -264,9 +264,10 @@ await getFromBase();
       coinInventoryStore.setQuantity(currency, 0);
     }
     else {
-      streakStore.setStop(true);
+      //streakStore.setStop(true);
       prepStore.setRecapMsg("No coins to sell");
-      prepStore.setStatus("Stopped");
+      //prepStore.setStatus("Stopped");
+      coinInventoryStore.setQuantity(currency, 0);
       upsertToBase();
       return {
         response: "No coins to sell",
