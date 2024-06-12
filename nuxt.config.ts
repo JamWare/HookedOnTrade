@@ -7,11 +7,11 @@ export default defineNuxtConfig({
       baseUrl: process.env.BASE_URL || 'http://localhost:3000',
     },
   },
-  supabase: {
-    redirectOptions: {
-      login: '/login',
-      callback: '/confirm',
-      include: ['/', '/showFile'],
-    }
-  }
+  // supabase: {
+  //   redirectOptions: {
+  //     login: '/login',
+  //     callback: '/confirm',
+  //     include: ['/', '/showFile'],
+  //   }
+  // }
 })

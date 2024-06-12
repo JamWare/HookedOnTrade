@@ -6,6 +6,7 @@ import { serverSupabaseClient } from '#supabase/server'
 import { chosenCurrency } from "../currencyList";
 import { getFromBase } from "../callGetFromBase";
 import { upsertToBase } from "../callUpsertToBase";
+import { stopManagement } from "../stopManagement";
 
 export default defineEventHandler(async (event) => {
 
@@ -30,8 +31,7 @@ export default defineEventHandler(async (event) => {
       coinInventoryStore: coinInventoryStore.$state,
       }
       }
-      
-      // Facade #1
+      // Contract choice ====================================== currency
       currency = chosenCurrency(body);
       
       const baseAmount = prepStore.getUSDT;
@@ -47,7 +47,8 @@ export default defineEventHandler(async (event) => {
       let won = streakStore.getWin;
       let loss = streakStore.getLoss;
 
-      let filterResponse = getFromBase(supabase);
+      // Risk Management ====================================== stop
+      let filterResponse = stopManagement(supabase);
     
       console.log("filterResponse: ", filterResponse);
     
@@ -64,6 +65,7 @@ export default defineEventHandler(async (event) => {
     };
   }
 
+  // Buy order ====================================== long
   if (body.tradeType === "long") {
     if (coinInventoryStore.getCoin(currency) < 0) {
       const buyResp = await long(currency, -coinInventoryStore.getCoin(currency) + size, leverage);
@@ -102,6 +104,7 @@ export default defineEventHandler(async (event) => {
       currency: currency,
       inventory: coinInventoryStore.getCoin(currency),
     }
+      // Sell order ====================================== short
   } else if (body.tradeType === "short") { // DONT FORGET TO CHANGE THE API CALLS AFTER TESTING
     if (coinInventoryStore.getCoin(currency) > 0) {
       const shortResp = await short(currency, coinInventoryStore.getCoin(currency) + size, leverage);
@@ -141,6 +144,7 @@ export default defineEventHandler(async (event) => {
       inventory: coinInventoryStore.getCoin(currency),
     }
   }
+  // Sell order ====================================== sell
   else if (body.tradeType === "sell") {
     if(coinInventoryStore.getCoin(currency) >= 1){
       const sellResp = await short(currency, coinInventoryStore.getCoin(currency), leverage);
@@ -187,6 +191,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Risk Management ====================================== stop
   if (lossCheck > maxDrawdown) {
     streakStore.setStop(true);
     streakStore.setSize(0);
