@@ -23,14 +23,16 @@ export default defineEventHandler(async (event) => {
   const USDT = 153.77//await accountUSDT();
   let currency = ""
 
-  
+  // Get data from base ====================================== getFromBase
+  getFromBase(supabase);
+
   if (body.info === true){
     return {
       streakStore: streakStore.$state,
       prepStore: prepStore.$state,
       coinInventoryStore: coinInventoryStore.$state,
       }
-      }
+  }
       // Contract choice ====================================== currency
       currency = chosenCurrency(body);
       
@@ -49,8 +51,6 @@ export default defineEventHandler(async (event) => {
 
       // Risk Management ====================================== stop
       let filterResponse = stopManagement(supabase);
-    
-      console.log("filterResponse: ", filterResponse);
     
     if (filterResponse.response !== undefined) {
       return filterResponse;

@@ -60,7 +60,7 @@
 <script setup lang="ts">
 const supabase = useSupabaseClient()
 
-const selectedCoin = ref<string>('PEOPLEUSDTM');
+const selectedCoin = ref<string>('JASMYUSDT');
 let coinToBuy = ref<string>('');
 let coinToShort = ref<string>('');
 let coinToInfo = ref<string>('');

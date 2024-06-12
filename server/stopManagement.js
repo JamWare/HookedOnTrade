@@ -1,5 +1,5 @@
 import {streakStore, prepStore, coinInventoryStore} from './callLeStore'
-import { upsertToBase } from "../callUpsertToBase";
+import { upsertToBase } from "./callUpsertToBase";
 
 export const stopManagement = async (supabase, currency, size, stop) => {
     if (size < 1 || stop) {
