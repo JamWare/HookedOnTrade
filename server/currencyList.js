@@ -2,6 +2,7 @@ let currency = 'currency not found';
 
 export const chosenCurrency = (body) => {
     const currencyMap = {
+        "JASMY": "JASMYUSDTM",
         "PEPE": "PEPEUSDTM",
         "SHIB": "SHIBUSDTM",
         "LADYS": "10000LADYSUSDTM",
