@@ -18,16 +18,16 @@ I can't test it again right now since I stopped paying my subscription on Tradin
 
 ## The next step
 
-[] I plan on making a youtube video to show you how it works. It is planned between now and the end of november 2024. My apologies if it takes longer.
+- [ ] I plan on making a youtube video to show you how it works. It is planned between now and the end of november 2024. My apologies if it takes longer.
 
 ## What it needs
 
-[] Unit Tests
-[] CI/CD
-[] TradeReception.js needs to be reworked for better readability.
-[] More and better written safeguards if the user loses money.
-[] Make the safeguards graphic
-[] Have a visual cue of how the current strategy in play is performing.
+- [ ] Unit Tests
+- [ ] CI/CD
+- [ ] TradeReception.js needs to be reworked for better readability.
+- [ ] More and better written safeguards if the user loses money.
+- [ ] Make the safeguards graphic
+- [ ] Have a visual cue of how the current strategy in play is performing.
 
 ## What I am doing right now
 Taking online courses to replace TradingView by my own alternative.
